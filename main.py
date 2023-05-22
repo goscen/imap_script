@@ -20,18 +20,24 @@ class Imap:
         self.increment = 0
 
     def start_work(self):
+
         self.login()
         self.select_mailbox()
 
-
     def select_mailbox(self):
+
         self.send_command(f"aaa{self.increment} SELECT {self.mailbox}")
         self.receive_answer()
 
     def login(self):
-        password = getpass(prompt='Введите пароль от почты: ')
-        self.send_command(f'aaa{self.increment} LOGIN {self.mail_addr} {password}')
-        self.receive_answer()
+        password = getpass()
+        try:
+            self.send_command(f'aaa{self.increment} LOGIN {self.mail_addr} {password}')
+            self.receive_answer()
+            self.receive_answer()
+        except Exception:
+            print("Password not correct")
+            sys.exit()
 
     def send_command(self, command):
         self.increment += 1
@@ -49,7 +55,19 @@ class Imap:
                 break
         message = response.decode('utf-8')
         if 'BAD' in message or 'NO' in message:
-            raise Exception("server error message")
+            raise Exception()
         while not any([x in message for x in ['BAD', 'NO', 'OK']]):
             message += self.receive_answer()
         return message
+
+
+if __name__ == "__main__":
+    script = Imap("imap.mail.ru",
+                  993,
+                  "anar.guseynov.03@mail.ru",
+                  "INBOX",
+                  1,
+                  5,
+                  True
+                  )
+    script.start_work()
